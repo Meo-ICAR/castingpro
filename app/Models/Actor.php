@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
+use App\Jobs\GeocodeActorJob;
 use App\Traits\HasWhatsapp;  // <--- Importa il Trait
 use Carbon\Carbon;
 // use Cheesegrits\FilamentGoogleMaps\Fields\Map;
-use Cheesegrits\FilamentGoogleMaps\Helpers\Geocode;
+use Cheesegrits\FilamentGoogleMaps\Helpers\Geocoder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
@@ -88,28 +89,11 @@ class Actor extends Model implements HasMedia  // <--- 1. Implementa l'interfacc
                 $model->company_id = auth()->user()->company_id;
             }
         });
-        static::saving(function ($model) {
+        static::saved(function ($model) {
             if ($model->isDirty(['city', 'province', 'country'])) {
-                $model->geocodeViaPlugin();
+                GeocodeActorJob::dispatch($model);
             }
         });
-    }
-
-    /**
-     * Utilizza la logica del plugin per ottenere le coordinate
-     */
-    public function geocodeViaPlugin()
-    {
-        $address = "{$this->city}, {$this->province}, {$this->country}";
-
-        // Utilizziamo la classe Geocode del plugin
-        // $result = Geocode::geocodeAddress($address);
-        $result = Geocode::geocodeAddress($address);
-
-        if ($result) {
-            $this->latitude = $result['lat'];
-            $this->longitude = $result['lng'];
-        }
     }
 
     /**
@@ -164,7 +148,7 @@ class Actor extends Model implements HasMedia  // <--- 1. Implementa l'interfacc
     {
         if (is_string($value)) {
             // Se ricevi una stringa (nome città), cerca le coordinate
-            $geocoded = Geocode::getCoordinatesForAddress($value);
+            $geocoded = (new Geocoder)->geocode($value);
             if ($geocoded) {
                 $this->attributes['latitude'] = $geocoded['lat'];
                 $this->attributes['longitude'] = $geocoded['lng'];
@@ -239,8 +223,7 @@ class Actor extends Model implements HasMedia  // <--- 1. Implementa l'interfacc
             ->addMediaConversion('thumb')
             ->width(300)
             ->height(300)
-            ->sharpen(10)
-            ->nonQueued();  // Generala subito (o togli per usare le code)
+            ->sharpen(10);
 
         // Se è un video, estrai un fotogramma al secondo 10 come copertina
         $this

@@ -39,6 +39,11 @@ class ActorResource extends Resource
         return ActorsTable::configure($table);
     }
 
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()->with(['media']);
+    }
+
     public static function getRelations(): array
     {
         return [

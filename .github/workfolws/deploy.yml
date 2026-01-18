@@ -1,0 +1,36 @@
+name: Deploy Laravel Project
+
+on:
+  push:
+    branches: [ "main" ] # Esegue il deploy quando carichi su main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/html/castingproai
+            git pull origin main
+
+            # Installazione dipendenze PHP
+            composer install --no-interaction --prefer-dist --optimize-autoloader
+
+            # Migrazioni database
+            php artisan migrate --force
+
+            # Ottimizzazione cache
+            php artisan optimize
+            php artisan view:cache
+            php artisan event:cache
+
+            # Riavvio coda (se usi queue workers)
+            php artisan queue:restart

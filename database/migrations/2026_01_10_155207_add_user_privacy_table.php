@@ -16,8 +16,8 @@ return new class extends Migration {
             $table->timestamp('data_processing_consent_at')->nullable();
             $table->timestamp('data_erasure_requested_at')->nullable();
             $table->timestamp('data_anonymized_at')->nullable();
-            $table->string('ip_address', 45)->nullable()->collation('utf8mb4_unicode_ci');
-            $table->text('user_agent')->nullable()->collation('utf8mb4_unicode_ci');
+            $table->string('ip_address', 45)->nullable();
+            $table->text('user_agent')->nullable();
             $table->softDeletes();
         });
     }

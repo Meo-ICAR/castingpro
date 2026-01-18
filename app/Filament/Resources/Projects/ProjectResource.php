@@ -73,7 +73,7 @@ class ProjectResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery()
-            ->with(['owner', 'roles']);
+            ->with(['owner', 'roles', 'media']);
 
         return $query;
     }
