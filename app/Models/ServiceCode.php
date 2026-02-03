@@ -10,7 +10,8 @@ class ServiceCode extends Model
 {
     protected $guarded = [];
 
-public function services(): BelongsToMany
-{
-    return $this->belongsToMany(Service::class, 'service_service_code');
+    public function services(): BelongsToMany
+    {
+        return $this->belongsToMany(Service::class, 'service_service_code');
+    }
 }

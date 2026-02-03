@@ -35,5 +35,5 @@ jobs:
             # Riavvio coda (se usi queue workers)
             php artisan queue:restart
 
-            echo "✅ Deploy completato con successo!"
+            echo "--Deploy completato con successo!"
             echo "Hash attuale sul server: $(git rev-parse --short HEAD)"
